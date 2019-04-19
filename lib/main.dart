@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
 
 void main() => runApp(MyApp());
 
@@ -8,7 +7,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'My Wallet Calculator ',
+      title: 'My Wallet Calculator',
       theme: ThemeData(
         primaryColor: Colors.green,
       ),
@@ -18,10 +17,10 @@ class MyApp extends StatelessWidget {
 }
 
 class WalletScreenState extends State<WalletScreen> {
-  final _suggestions = <WordPair>[];
+  List<String> _events = List<String>();
   final _biggerFont = const TextStyle(fontSize: 18.0);
-  final Set<WordPair> _saved = Set<WordPair>();
 
+  final walletTextController = TextEditingController();
   final moneyTextController = TextEditingController();
   final eventTextController = TextEditingController();
 
@@ -30,25 +29,28 @@ class WalletScreenState extends State<WalletScreen> {
     // Clean up the controller when the Widget is disposed
     moneyTextController.dispose();
     eventTextController.dispose();
+    walletTextController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    walletTextController.text = "0"; // todo save this value to db
   }
 
   Widget _buildSuggestions() {
     return ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        itemBuilder: (context, i) {
-          if (i.isOdd) return Divider();
-
-          final index = i ~/ 2;
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(generateWordPairs().take(10));
-          }
-          return _buildRow(_suggestions[index]);
+        itemCount: _events.length,
+        itemBuilder: (context, index) {
+          if (index.isOdd) return Divider(); //todo add data from db
+          return _buildRow(_events[index]);
         });
   }
 
-  Widget _buildRow(WordPair pair) {
-    final bool alreadySaved = _saved.contains(pair);
+  Widget _buildRow(String event) {
+    final bool alreadySaved = _events.contains(event);
 
     return ListTile(
       trailing: Icon(
@@ -56,16 +58,16 @@ class WalletScreenState extends State<WalletScreen> {
         color: alreadySaved ? Colors.red : null,
       ),
       title: Text(
-        pair.asPascalCase,
+        event,
         style: _biggerFont,
       ),
       onTap: () {
         setState(() {
-          if (alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
+//          if (alreadySaved) {
+//            _saved.remove(event);
+//          } else {
+//            _saved.add(event);
+//          }
         });
       },
     );
@@ -110,7 +112,14 @@ class WalletScreenState extends State<WalletScreen> {
                       new FlatButton(
                         child: new Text("Add"),
                         onPressed: () {
-                          //todo add
+                          setState(() {
+                            _events.add(eventTextController.text);
+                            walletTextController.text =
+                                (int.parse(walletTextController.text) -
+                                        int.parse(moneyTextController.text))
+                                    .toString();
+                          });
+                          Navigator.of(context).pop();
                         },
                       ),
                       new FlatButton(
@@ -132,11 +141,11 @@ class WalletScreenState extends State<WalletScreen> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (BuildContext context) {
-          final Iterable<ListTile> tiles = _saved.map(
-            (WordPair pair) {
+          final Iterable<ListTile> tiles = _events.map(
+            (String pair) {
               return ListTile(
                 title: Text(
-                  pair.asPascalCase,
+                  pair,
                   style: _biggerFont,
                 ),
               );
