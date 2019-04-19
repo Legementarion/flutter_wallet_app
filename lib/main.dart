@@ -22,6 +22,17 @@ class WalletScreenState extends State<WalletScreen> {
   final _biggerFont = const TextStyle(fontSize: 18.0);
   final Set<WordPair> _saved = Set<WordPair>();
 
+  final moneyTextController = TextEditingController();
+  final eventTextController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the Widget is disposed
+    moneyTextController.dispose();
+    eventTextController.dispose();
+    super.dispose();
+  }
+
   Widget _buildSuggestions() {
     return ListView.builder(
         padding: const EdgeInsets.all(16.0),
@@ -66,14 +77,52 @@ class WalletScreenState extends State<WalletScreen> {
       appBar: AppBar(
         title: Text('Startup Name Generator'),
         actions: <Widget>[
-          // Add 3 lines from here...
           IconButton(icon: Icon(Icons.list), onPressed: _pushSaved),
         ],
       ),
       body: _buildSuggestions(),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addWalletMoney(),
-        tooltip: 'Increment',
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (ctxt) => new AlertDialog(
+                    title: new Text("Add Event"),
+                    content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          new Text("How many and where you spend?"),
+                          new Padding(
+                            padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                            child: new TextField(
+                              decoration:
+                                  new InputDecoration(labelText: 'Money ?'),
+                              keyboardType: TextInputType.number,
+                              controller: moneyTextController,
+                            ),
+                          ),
+                          new TextField(
+                            decoration:
+                                new InputDecoration(labelText: 'Event ?'),
+                            controller: eventTextController,
+                          )
+                        ]),
+                    actions: <Widget>[
+                      new FlatButton(
+                        child: new Text("Add"),
+                        onPressed: () {
+                          //todo add
+                        },
+                      ),
+                      new FlatButton(
+                        child: new Text("Cancel"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ));
+        },
+        tooltip: 'AddMoney',
         child: Icon(Icons.add),
       ),
     );
@@ -108,8 +157,6 @@ class WalletScreenState extends State<WalletScreen> {
       ),
     );
   }
-
-  _addWalletMoney() {}
 }
 
 class WalletScreen extends StatefulWidget {
