@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_wallet_app/screens/CalendarScreen.dart';
+import 'package:flutter_wallet_app/single.dart';
 
 class WalletScreenState extends State<WalletScreen> {
   List<String> _events = List<String>();
@@ -8,7 +9,11 @@ class WalletScreenState extends State<WalletScreen> {
   final walletTextController = TextEditingController();
   final moneyTextController = TextEditingController();
   final eventTextController = TextEditingController();
-  var daysRemain = "3";
+  final database = myDataBase;
+  String daysRemain =
+      (DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day -
+              DateTime.now().day)
+          .toString();
 
   @override
   void dispose() {
@@ -22,7 +27,11 @@ class WalletScreenState extends State<WalletScreen> {
   @override
   void initState() {
     super.initState();
-    walletTextController.text = "0"; // todo save this value to db
+//    database.wallet
+//        .then((wallet) => {walletTextController.text = wallet.money.toString()},
+//            onError: (error) {
+//      return "0";
+//    });
   }
 
   Widget _walletStatus(BuildContext context) {
