@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wallet_app/moor_db.dart';
 import 'package:flutter_wallet_app/screens/CalendarScreen.dart';
 import 'package:flutter_wallet_app/single.dart';
 
 class WalletScreenState extends State<WalletScreen> {
-  List<String> _events = List<String>();
+  List<Event> _events = List<Event>();
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
   final walletTextController = TextEditingController();
@@ -27,6 +28,10 @@ class WalletScreenState extends State<WalletScreen> {
   @override
   void initState() {
     super.initState();
+    walletTextController.text = "0";
+    myDataBase.watchEventEntries().listen((data) {
+      _events.addAll(data);
+    });
 //    database.wallet
 //        .then((wallet) => {walletTextController.text = wallet.money.toString()},
 //            onError: (error) {
@@ -113,7 +118,7 @@ class WalletScreenState extends State<WalletScreen> {
                   child: new Text("Add"),
                   onPressed: () {
                     setState(() {
-                      _events.add(eventTextController.text);
+//                      _events.add(eventTextController.text);
                       walletTextController.text =
                           (int.parse(walletTextController.text) -
                                   int.parse(moneyTextController.text))
@@ -137,12 +142,12 @@ class WalletScreenState extends State<WalletScreen> {
         padding: const EdgeInsets.all(16.0),
         itemCount: _events.length,
         itemBuilder: (context, index) {
-          if (index.isOdd) return Divider(); //todo init events from db
+          if (index.isOdd) return Divider();
           return _buildRow(_events[index]);
         });
   }
 
-  Widget _buildRow(String event) {
+  Widget _buildRow(Event event) {
     final bool alreadySaved = _events.contains(event);
 
     return ListTile(
@@ -151,7 +156,7 @@ class WalletScreenState extends State<WalletScreen> {
         color: alreadySaved ? Colors.red : null,
       ),
       title: Text(
-        event,
+        event.title + "spent - " + event.money,
         style: _biggerFont,
       ),
       onTap: () {
@@ -205,7 +210,11 @@ class WalletScreenState extends State<WalletScreen> {
                         child: new Text("Add"),
                         onPressed: () {
                           setState(() {
-                            _events.add(eventTextController.text);
+                            var event = Event(
+                                title: eventTextController.text,
+                                money: moneyTextController.text,
+                                date: DateTime.now());
+                            myDataBase.updateEvent(event);
                             walletTextController.text =
                                 (int.parse(walletTextController.text) -
                                         int.parse(moneyTextController.text))
